@@ -1,6 +1,6 @@
 import socket, json, time
 from crypto.aes_encryption import encrypt_message, decrypt_message
-from src.config import (
+from config import (
     REPLAY_TOLERANCE_SECONDS,
     CHAT_HOST,
     CHAT_PORT,
@@ -9,66 +9,50 @@ from src.config import (
 )
 
 def start_chat_server():
-
     print(f"[*] Iniciando Servidor Chat em {CHAT_HOST}:{CHAT_PORT}")
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
-
         server.bind((CHAT_HOST, CHAT_PORT))
         server.listen()
 
         while True:
-
             conn, addr = server.accept()
-
             with conn:
                 print(f"\n[+] Conexao recebida de {addr}")
-
                 data = conn.recv(BUFFER_SIZE)
 
                 if not data:
                     continue
 
                 request = json.loads(data.decode())
-                print(f"[*] Pedido recebido: {request}")
+                print(f"[*] Pedido recebido (Tamanho: {len(data)} bytes)")
 
                 ticket_v_encrypted = request["ticket_v"]
                 authenticator_encrypted = request["authenticator"]
 
                 try:
-                    ticket_json = decrypt_message(
-                        K_V,
-                        ticket_v_encrypted
-                    )
+                    ticket_json = decrypt_message(K_V, ticket_v_encrypted)
                 except ValueError:
                     print("[-] Falha ao abrir o Ticket_v.")
                     continue
 
                 ticket = json.loads(ticket_json)
-
                 k_c_v = ticket["k_c_v"]
                 id_c_ticket = ticket["id_c"]
-
                 ts_4 = ticket["ts_4"]
                 lifetime = ticket["lifetime_4"]
 
                 if time.time() > ts_4 + lifetime:
-
-                    print("Ticket expirado")
-
+                    print("[-] Ticket expirado")
                     continue
 
                 try:
-                    auth_json = decrypt_message(
-                        k_c_v,
-                        authenticator_encrypted
-                    )
+                    auth_json = decrypt_message(k_c_v, authenticator_encrypted)
                 except ValueError:
                     print("[-] Falha ao abrir o Autenticador.")
                     continue
 
                 auth = json.loads(auth_json)
-
                 id_c_auth = auth["id_c"]
                 ts_5 = auth["ts_5"]
 
@@ -79,7 +63,7 @@ def start_chat_server():
                     continue
 
                 if auth["ad_c"] != ticket["ad_c"]:
-                    print("[-] Endereço do cliente não confere.")
+                    print("[-] Endereco do cliente nao confere.")
                     continue
 
                 print(f"[+] Cliente '{id_c_ticket}' autenticado com sucesso via Autenticador!")
@@ -87,10 +71,26 @@ def start_chat_server():
                 response = {
                     "ts_5": ts_5 + 1
                 }
-
-                encrypted = encrypt_message(
-                    k_c_v,
-                    json.dumps(response)
-                )
-
+                encrypted = encrypt_message(k_c_v, json.dumps(response))
                 conn.sendall(encrypted)
+
+                print(f"[*] Chat seguro iniciado. Aguardando mensagens de '{id_c_ticket}'...")
+                
+                while True:
+                    try:
+                        msg_data = conn.recv(BUFFER_SIZE)
+                        
+                        if not msg_data:
+                            print(f"[-] Cliente '{id_c_ticket}' encerrou a conexao.")
+                            break
+                            
+                        decrypted_msg = decrypt_message(k_c_v, msg_data)
+                        
+                        print(f"[{id_c_ticket} diz]: {decrypted_msg}")
+                        
+                    except ValueError:
+                        print("[-] Erro de integridade: a mensagem pode ter sido adulterada no caminho")
+                        break
+                    except ConnectionResetError:
+                        print(f"[-] Conexao perdida com '{id_c_ticket}'.")
+                        break

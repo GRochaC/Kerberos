@@ -156,10 +156,7 @@ def authenticate_chat(service_data: dict, id_c) -> bool:
         "ts_5": ts_5
     }
 
-    auth_encrypted = encrypt_message(
-        k_c_v,
-        json.dumps(auth)
-    ).decode()
+    auth_encrypted = encrypt_message(k_c_v, json.dumps(auth)).decode()
 
     request_data = {
         "ticket_v": ticket_v,
@@ -185,6 +182,25 @@ def authenticate_chat(service_data: dict, id_c) -> bool:
 
                 if response_data["ts_5"] == ts_5 + 1:
                     print("[+] Autenticação mútua realizada!")
+                    print("\n" + "="*40)
+                    print("CHAT SEGURO INICIADO :)")
+                    print("Digite sua mensagem e aperte Enter.")
+                    print("Digite 'exit' (letras maiusculas ou minusculas) para encerrar a conexão.")
+                    print("="*40 + "\n")
+                    
+                    while True:
+                        msg = input(f"[{id_c}]: ")
+                        
+                        if msg.lower().strip() == 'exit':
+                            print("[*] Encerrando o chat...")
+                            break
+                            
+                        if msg.strip() == "":
+                            continue
+                            
+                        msg_encrypted = encrypt_message(k_c_v, msg)
+                        s.sendall(msg_encrypted)
+
                     return True
 
                 print("[-] Erro: Servidor inválido")

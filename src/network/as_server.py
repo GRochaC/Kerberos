@@ -11,7 +11,8 @@ from config import (
 
 # K_TGS agora vem do config.py (chave fixa e compartilhada com o tgs_server.py)
 USERS_DB = {
-    "alice": b'Wk4A0Ubf0FWa_XQydOxIUxxKbAK9hpm0UxFBrGWN87k=' # gerada com a senha 'senha'
+    "alice": b'Wk4A0Ubf0FWa_XQydOxIUxxKbAK9hpm0UxFBrGWN87k=', # gerada com a senha 'senha'
+    "bob": b'YBtofJPm9vloAdAkpTuCBoPW_xH61uYCFBMKNBenZsg=' # gerada com a senha 'outrasenha'
 }
 
 def start_as_server():
