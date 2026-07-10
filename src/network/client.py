@@ -6,7 +6,9 @@ from src.config import (
 	AS_PORT,
 	TGS_HOST,
 	TGS_PORT,
-    BUFFER_SIZE
+    BUFFER_SIZE,
+    CHAT_HOST,
+    CHAT_PORT
 )
 
 def request_tgt():
@@ -125,8 +127,66 @@ def request_service_ticket(tgt_data: dict):
         print("[-] ERRO: Nao foi possível conectar ao TGS. O servidor está rodando?")
         return None
 
+def authenticate_chat(service_data: dict, id_c) -> bool:
+    # Passo 5: prepara o Autenticador e envia o Ticket_v + Autenticador_c ao Serviço V.
+    k_c_v = service_data["k_c_v"]
+    ticket_v = service_data["ticket_v"]
+
+    ts_5 = time.time()
+
+    # O autenticador prova ao Servidor Chat que o cliente conhece a chave de sessão K_c_v
+    # e que a requisição é recente.
+    auth = {
+        "id_c": id_c,
+        "ad_c": socket.gethostbyname(socket.gethostname()),
+        "ts_5": ts_5
+    }
+
+    auth_encrypted = encrypt_message(
+        k_c_v,
+        json.dumps(auth)
+    ).decode()
+
+    request_data = {
+        "ticket_v": ticket_v,
+        "authenticator": auth_encrypted
+    }
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            print(f"[*] Conectando ao Servidor Chat ({CHAT_HOST}:{CHAT_PORT})...")
+            s.connect((CHAT_HOST, CHAT_PORT))
+
+            s.sendall(json.dumps(request_data).encode('utf-8'))
+
+            encrypted_response = s.recv(BUFFER_SIZE)
+            if not encrypted_response:
+                print("[-] Nenhuma resposta do Servidor Chat.")
+                return False
+
+            try:
+                # Passo 6: o servidor de chat responde com TS_5 + 1 cifrado com K_c_v.
+                decrypted_json = decrypt_message(k_c_v, encrypted_response)
+                response_data = json.loads(decrypted_json)
+
+                if response_data["ts_5"] == ts_5 + 1:
+                    print("[+] Autenticação mútua realizada!")
+                    return True
+
+                print("[-] Erro: Servidor inválido")
+                return False
+            except ValueError:
+                print("\n[-] ERRO: Falha ao decifrar a resposta do Servidor Chat.")
+                return False
+    except ConnectionRefusedError:
+        print("[-] ERRO: Não foi possível conectar ao Servidor Chat.")
+        return False
+        
 
 if __name__ == "__main__":
     tgt_data = request_tgt()
     if tgt_data:
-        request_service_ticket(tgt_data)
+        service_data = request_service_ticket(tgt_data)
+
+        if service_data:
+            authenticate_chat(service_data, tgt_data["id_c"])
