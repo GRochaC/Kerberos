@@ -5,7 +5,7 @@
 
 ```
 whatchat/
-├── whatchat/                    # Pacote principal
+├── src/                    # Pacote principal
 │   ├── __init__.py
 │   ├── config.py		  # Configurações do projeto (endereços, portas, tolerâncias de tempo)
 │   ├── auth/                   # Autenticação, Derivação de Chave e Tickets
@@ -33,9 +33,7 @@ whatchat/
 │       └── input_handler.py   # Leitura de input do usuário
 │
 ├── tests/                     # Testes unitários e de integração
-│   ├── __init__.py
-│   ├── test_kerberos_flow.py # Testar o fluxo das 6 mensagens
-│   └── test_crypto.py        # Testar a KDF e a encriptação AES
+│   └── __init__.py
 │
 ├── docs/                      # Documentação
 │   ├── RELATORIO_TECNICO.pdf  # Relatório técnico (10 páginas max)

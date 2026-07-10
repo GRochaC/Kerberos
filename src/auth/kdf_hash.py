@@ -1,9 +1,9 @@
 import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from src.config import KDF_ITERATIONS
+from src.config import KDF_ITERATIONS, SALT_DOMAIN
 
-def derive_client_key(password: str, username: str, domain: str) -> bytes:
+def derive_client_key(password: str, username: str, domain: str = SALT_DOMAIN) -> bytes:
     """
     Deriva uma chave simetrica segura a partir da senha do usuário (slide 16 e 17)
     """

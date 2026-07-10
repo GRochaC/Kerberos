@@ -1,6 +1,6 @@
 import socket, json, time, os, base64
-from src.crypto.aes_encryption import encrypt_message
-from src.config import (
+from crypto.aes_encryption import encrypt_message
+from config import (
 	REPLAY_TOLERANCE_SECONDS, 
 	LIFETIME_TGT_SECONDS,
 	AS_HOST,
@@ -10,7 +10,7 @@ from src.config import (
 
 K_TGS = base64.urlsafe_b64encode(os.urandom(32)) # Chave secreta do TGS (K_tgs), usada tambem pelo AS
 USERS_DB = {
-    "alice": b"gerar exemplo base 64 com kdf_hash.py" 
+    "alice": b'Wk4A0Ubf0FWa_XQydOxIUxxKbAK9hpm0UxFBrGWN87k=' # gerada com a senha 'senha'
 }
 
 def start_as_server():
@@ -40,6 +40,7 @@ def start_as_server():
                 ts_cur = time.time()
                 if abs(ts_cur - ts_1) > REPLAY_TOLERANCE_SECONDS:
                     print("[-] Timestamp invalido ou muito antigo. Possivel ataque de replay")
+                    continue
 
                 if id_c not in USERS_DB:
                     print("[-] Usuario nao encontrado. Abortando...")
