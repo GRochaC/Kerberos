@@ -6,9 +6,10 @@ from config import (
 	AS_HOST,
 	AS_PORT,
     BUFFER_SIZE,
+    K_TGS,
 )
 
-K_TGS = base64.urlsafe_b64encode(os.urandom(32)) # Chave secreta do TGS (K_tgs), usada tambem pelo AS
+# K_TGS agora vem do config.py (chave fixa e compartilhada com o tgs_server.py)
 USERS_DB = {
     "alice": b'Wk4A0Ubf0FWa_XQydOxIUxxKbAK9hpm0UxFBrGWN87k=' # gerada com a senha 'senha'
 }
