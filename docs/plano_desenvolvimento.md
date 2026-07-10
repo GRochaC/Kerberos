@@ -7,6 +7,7 @@
 whatchat/
 ├── whatchat/                    # Pacote principal
 │   ├── __init__.py
+│   ├── config.py		  # Configurações do projeto (endereços, portas, tolerâncias de tempo)
 │   ├── auth/                   # Autenticação, Derivação de Chave e Tickets
 │   │   ├── __init__.py
 │   │   ├── user_manager.py     # Gerenciamento de usuários do AS (username, hash_senha/chave_K_c)
@@ -35,10 +36,6 @@ whatchat/
 │   ├── __init__.py
 │   ├── test_kerberos_flow.py # Testar o fluxo das 6 mensagens
 │   └── test_crypto.py        # Testar a KDF e a encriptação AES
-│
-├── config/                    # Arquivos de configuração
-│   ├── servers_config.yaml    # Configurações do AS, TGS e Chat Server
-│   └── client_config.yaml     # Endereços e portas dos servidores
 │
 ├── docs/                      # Documentação
 │   ├── RELATORIO_TECNICO.pdf  # Relatório técnico (10 páginas max)
