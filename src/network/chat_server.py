@@ -78,9 +78,9 @@ def start_chat_server():
                 if abs(time.time() - ts_5) > REPLAY_TOLERANCE_SECONDS:
                     continue
 
-                # if auth["ad_c"] != ticket["ad_c"]:
-                #     print("[-] Endereço do cliente não confere.")
-                #     continue
+                if auth["ad_c"] != ticket["ad_c"]:
+                    print("[-] Endereço do cliente não confere.")
+                    continue
 
                 print(f"[+] Cliente '{id_c_ticket}' autenticado com sucesso via Autenticador!")
 
