@@ -11,6 +11,20 @@ from src.config import (
     CHAT_PORT
 )
 
+def _get_routing_ip(target_host: str, target_port: int) -> str:
+    """
+    Descobre qual o IP que vai ser usado para a conexao
+    """
+    try:
+        # Cria um socket UDP (SOCK_DGRAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((target_host, target_port))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except:
+        return "127.0.0.1" # localhost
+
 def request_tgt():
     print("=== Login no WhatsChat (Kerberos) ===")
     id_c = input("Usuario: ").strip()
@@ -79,7 +93,7 @@ def request_service_ticket(tgt_data: dict):
     ts_3 = time.time()
 
     # Autenticador: prova que o cliente e o dono do ticket, sem reenviar a senha
-    ip_do_cliente = socket.gethostbyname(socket.gethostname())
+    ip_do_cliente = _get_routing_ip(TGS_HOST, TGS_PORT)
     authenticator_dict = {
         "id_c": id_c,
         "ad_c": ip_do_cliente,
@@ -138,7 +152,7 @@ def authenticate_chat(service_data: dict, id_c) -> bool:
     # e que a requisição é recente.
     auth = {
         "id_c": id_c,
-        "ad_c": socket.gethostbyname(socket.gethostname()),
+        "ad_c": _get_routing_ip(CHAT_HOST, CHAT_PORT),
         "ts_5": ts_5
     }
 
