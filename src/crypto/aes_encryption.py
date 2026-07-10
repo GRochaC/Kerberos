@@ -1,12 +1,11 @@
 import os, base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
-
-NONCE_SIZE = 12
+from src.config import NONCE_SIZE
 
 def encrypt_message(key_base64: bytes, plaintext: str) -> bytes:
     """
-    Criptografa um  texto com AES-GCM. Retorna o ciphertext em Base64, incluindo o Nonce.
+    Criptografa um texto com AES-GCM. Retorna o ciphertext em Base64, incluindo o Nonce.
     """
     key = base64.urlsafe_b64decode(key_base64)
     aesgcm = AESGCM(key)
@@ -16,7 +15,6 @@ def encrypt_message(key_base64: bytes, plaintext: str) -> bytes:
     ciphertext = aesgcm.encrypt(nonce, plaintext_bytes, associated_data=None)
     
     return base64.urlsafe_b64encode(nonce + ciphertext)
-
 
 def decrypt_message(key_base64: bytes, encrypted_payload_base64: bytes) -> str:
     """
